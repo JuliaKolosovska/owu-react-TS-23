@@ -5,7 +5,7 @@ import {IUser} from "../interfaces/user.interface";
 
 const userService={
     getAll:(): IRes<IUser[]>=>axiosService.get(urls.users.users),
-    getById:(id:number):IRes<IUser>=>axiosService.get(urls.users.byId(id))
+    getById:(id:string):IRes<IUser>=>axiosService.get(urls.users.byId(id))
 }
 
 export{
