@@ -1,2 +1,2 @@
-export * from './';
-export * from './';
+export * from './slice';
+export * from './store';

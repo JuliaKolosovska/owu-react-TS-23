@@ -1,2 +1,2 @@
-export * from './';
+export * from './redux.hooks';
 export * from './';
