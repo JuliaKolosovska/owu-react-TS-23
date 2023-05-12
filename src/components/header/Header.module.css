@@ -3,8 +3,11 @@
     justify-content: space-between;
     align-items: center;
     font-size: 25px;
+    height: 70px;
     color: snow;
-    background-color: blue;
+    background-color: #8885ff;
+    padding-left: 40px;
+    padding-right: 40px;
 }
 
 .Header a {
@@ -14,5 +17,5 @@
 }
 
 .Header a[class='active'] {
-    color: red;
+    color: #a10202;
 }

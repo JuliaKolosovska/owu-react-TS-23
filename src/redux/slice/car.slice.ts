@@ -1,11 +1,13 @@
 import {createAsyncThunk, createSlice, isFulfilled, isRejectedWithValue} from "@reduxjs/toolkit";
 import {AxiosError} from "axios";
 
-import {ICar, IError} from "../../interfaces";
+import {ICar, IError, IPagination} from "../../interfaces";
 import {carService} from "../../services";
 
 interface IState {
     cars: ICar[],
+    prev: string,
+    next: string,
     errors: IError,
     trigger: boolean,
     carForUpdate: ICar
@@ -14,12 +16,14 @@ interface IState {
 
 const initialState: IState = {
     cars: [],
+    prev: null,
+    next: null,
     errors: null,
     carForUpdate: null,
     trigger: false
 };
 
-const getAll = createAsyncThunk<ICar[], void>(
+const getAll = createAsyncThunk<IPagination<ICar[]>, void>(
     'carSlice/getAll',
     async (_, {rejectWithValue}) => {
         try {
@@ -32,11 +36,11 @@ const getAll = createAsyncThunk<ICar[], void>(
     }
 )
 
-const create=createAsyncThunk<void, {car:ICar}>(
+const create = createAsyncThunk<void, { car: ICar }>(
     'carSlice/create',
     async ({car}, {rejectWithValue}) => {
         try {
-             await carService.create(car);
+            await carService.create(car);
 
         } catch (e) {
             const err = e as AxiosError
@@ -45,9 +49,9 @@ const create=createAsyncThunk<void, {car:ICar}>(
     }
 )
 
-const update=createAsyncThunk<void, {car:ICar, id:number}>(
+const update = createAsyncThunk<void, { car: ICar, id: number }>(
     'carSlice/update',
-    async ({id, car},{rejectWithValue}) => {
+    async ({id, car}, {rejectWithValue}) => {
         try {
             await carService.updateById(id, car);
 
@@ -58,9 +62,9 @@ const update=createAsyncThunk<void, {car:ICar, id:number}>(
     }
 )
 
-const deleteCar=createAsyncThunk<void, {id: number}>(
+const deleteCar = createAsyncThunk<void, { id: number }>(
     'carSlice/deleteCar',
-    async ({id},{rejectWithValue}) => {
+    async ({id}, {rejectWithValue}) => {
         try {
             await carService.deleteById(id);
 
@@ -75,23 +79,26 @@ const slice = createSlice({
     name: 'carSlice',
     initialState,
     reducers: {
-        setCarForUpdate:(state,action)=>{
-            state.carForUpdate=action.payload
+        setCarForUpdate: (state, action) => {
+            state.carForUpdate = action.payload
         }
     },
     extraReducers: builder =>
         builder
             .addCase(getAll.fulfilled, (state, action) => {
-                state.cars = action.payload
+                const {prev, next, items} = action.payload
+                state.cars = items
+                state.prev = prev
+                state.next = next
             })
             .addCase(update.fulfilled, (state) => {
-                state.carForUpdate=null
+                state.carForUpdate = null
             })
-            .addMatcher(isFulfilled(), state=>{
-                state.carForUpdate=null
+            .addMatcher(isFulfilled(), state => {
+                state.carForUpdate = null
             })
-            .addMatcher(isFulfilled(create,update, deleteCar), state=>{
-                state.trigger=!state.trigger
+            .addMatcher(isFulfilled(create, update, deleteCar), state => {
+                state.trigger = !state.trigger
             })
             .addMatcher(isRejectedWithValue(), (state, action) => {
                 state.errors = action.payload
